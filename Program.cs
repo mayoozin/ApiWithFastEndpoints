@@ -1,7 +1,4 @@
 global using FastEndpoints;
-global using FluentValidation;
-
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints();
