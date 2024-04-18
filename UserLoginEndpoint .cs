@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
+﻿using ApiWithFastEndpoints.Model;
+using FastEndpoints;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Paket;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,6 +12,12 @@ namespace ApiWithFastEndpoints
 {
     public class UserLoginEndpoint : Endpoint<LoginRequest>
     {
+        private readonly JWTModel _appSetting;
+
+        public UserLoginEndpoint(IOptions<JWTModel> settings)
+        {
+            _appSetting = settings.Value;
+        }
         public override void Configure()
         {
             Post("/api/login");
@@ -38,11 +47,13 @@ namespace ApiWithFastEndpoints
 
         private string BuildJWTToken()
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SecretKeywqewqeqqqqqqqqqqqweeeeeeeeeeeeeeeeeeeqweqe"));
+            //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>(
+            //    "JwtToken:SecretKey")));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSetting.SecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var issuer = "https://localhost:7146";
-            var audience = "https://localhost:7146";
-            var jwtValidity = DateTime.Now.AddMinutes(Convert.ToDouble("60"));
+            var issuer = _appSetting.Issuer;
+            var audience = _appSetting.Audience;
+            var jwtValidity = DateTime.Now.AddMinutes(Convert.ToDouble(_appSetting.TokenExpiry));
             var token = new JwtSecurityToken(issuer,
               audience,
               expires: jwtValidity,
